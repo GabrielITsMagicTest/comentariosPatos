@@ -19,6 +19,7 @@
     height: 40px;
     width: 100%;
     font-size: large;
+    padding-left: 10px;
 }
 
 .topics nav button {
@@ -49,6 +50,11 @@
     align-items: center;
     justify-content: center;
     font-size: 1.3rem;
+}
+
+.topics .topics-list li button.select-topic {
+    background-color: #7d3f60;
+    border: none;
 }
 
 .topics-list li:hover {

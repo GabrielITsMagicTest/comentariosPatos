@@ -1,22 +1,30 @@
 import './topics.css'
 
-function Topics({ findTopics, addTopic, topics, topicsInput, handleChangeTopics, getComent }) {
+function Topics({
+  findTopics,
+  addTopic,
+  topics,
+  topicsInput,
+  handleChangeTopics,
+  getComent,
+  topicID
+}) {
   return (
     <div className='topics'>
       <nav>
-        <button onClick={findTopics}>P</button>
+        <button disabled={!topicsInput} onClick={findTopics}>P</button>
         <input placeholder='procurar / criar topic' value={topicsInput} onChange={handleChangeTopics}></input>
-        <button onClick={addTopic}>+</button>
+        <button disabled={!topicsInput} onClick={addTopic}>+</button>
       </nav>
 
       <ul className='topics-list'>
-        {Object.keys(topics).map((topic) =>
-          <li>
-            <button onClick={() => getComent(topic)}>{topic}</button>
+        {topics.map((topic, index) =>
+          <li key={topic}>
+            <button className={topicID === topic ? "select-topic" : ""} onClick={() => getComent(topic)}>{topic}</button>
           </li>
         )}
       </ul>
-    </div>)
+    </div >)
 }
 
 export default Topics
