@@ -1,4 +1,5 @@
-const url = "https://comentariospatoapi.onrender.com"
+// const url = "https://comentariospatoapi.onrender.com"
+const url = "http://localhost:6060"
 
 async function request(endpoint, options = {}) {
   const res = await fetch(`${url}${endpoint}`, {
@@ -15,15 +16,23 @@ async function request(endpoint, options = {}) {
 
 const api = {
   checkAvaliable: () => request(''),
+
   getTopics: () => request('/topics'),
-  addTopic: (nameTopic) => request('/topics', {
+  addTopic: (name, user) => request('/topics', {
     method: "POST",
-    body: JSON.stringify({ topic: nameTopic })
+    body: JSON.stringify({ name, user })
   }),
+
   getComent: (nameTopic) => request(`/topics/coments?topic=${nameTopic}`),
-  addComent: (nameTopic, coment) => request('/topics/coment', {
+  addComent: (topic, coment, user) => request('/topics/coment', {
     method: "POST",
-    body: JSON.stringify({ topic: nameTopic, coment: coment })
+    body: JSON.stringify({ topic, coment, user })
+  }),
+
+  getUser: (user, pass) => request(`/user?user=${user}&pass=${pass}`),
+  addUser: (user, pass) => request(`/user`, {
+    method: "POST",
+    body: JSON.stringify({ user, pass })
   })
 }
 

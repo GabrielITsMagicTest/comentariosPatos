@@ -1,0 +1,6 @@
+bugs por causa do novo formato de comunição agora usando
+{coment, usuario} antes [coments] por isso bugs quando criar comentario
+usar esse mesmo sistema no topicos, e colocar um update automatico dos
+topicos e comentarios
+
+login e register ainda nao esta funcionando, nao tem token de acesso ou cookie

@@ -1,28 +1,34 @@
 import './coments.css'
 
-function Coments({
+const Coments = ({
   handleKeyComents,
   handleChangeComents,
   addComent,
   comentInput,
   coments,
   loadingComents
-}) {
+}) => {
   return (
     <div className='coments'>
       <ul className='coments-list'>
-        {coments.map((coment, index) =>
+        {Object.entries(coments).map(([index, coment]) =>
           <li key={index}>
-            <p>{coment}</p>
+            <div className='content-coment'>
+              <p>{coment.coment}</p>
+              <div>
+                <span>:{coment.user}</span>
+              </div>
+            </div>
           </li>
         )}
+
         {loadingComents === "loading" &&
-          <div>
-            <span>carregando</span>
+          <div className='coments-loading'>
+            <span>carregando...</span>
           </div>
         }
         {loadingComents === "none" &&
-          <div>
+          <div className='coments-loading'>
             <span>entre em algum tópico</span>
           </div>
         }

@@ -5,6 +5,7 @@
     display: flex;
     flex-direction: column;
     background-color: #7d3f60;
+    overflow-x: hidden;
 }
 
 .coments-list {
@@ -21,7 +22,7 @@
     position: relative;
 }
 
-.coments-list div {
+.coments-list .coments-loading {
     width: 100%;
     height: 100%;
     position: absolute;
@@ -33,22 +34,42 @@
     justify-content: center;
 }
 
-.coments-list div span {
+.coments-list .coments-loading span {
     color:white;
     text-align: center;
     align-items: center;
     font-size: 2rem;
 }
 
-.coments-list li {
+.coments-list li .content-coment {
     background-color: #372b2e;
     color: white;
     font-size: 1.3rem;
     border-radius: 12px;
     min-height: 70px;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     padding: 12px 40px;
+    height: 100%;
+}
+
+.coments-list li p {
+    align-items: start;
+    height: 100%;
+    margin: 0;
+    overflow-wrap: break-word;
+}
+
+.coments-list li div div  { 
+    height: 100%;
+    display: flex;
+    justify-content: end;
+}
+
+.coments-list li div div span {
+    background-color: #553645;
+    color: white;
+    padding: 10px;
 }
 
 .coments nav {
