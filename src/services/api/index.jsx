@@ -15,17 +15,25 @@ async function request(endpoint, options = {}) {
 }
 
 const api = {
-  checkAvaliable: () => request(''),
+  checkAvaliable: () => request('/'),
 
   getTopics: () => request('/topics'),
-  addTopic: (name, user) => request('/topics', {
+  addTopic: (topic, user) => request('/topics', {
     method: "POST",
-    body: JSON.stringify({ name, user })
+    body: JSON.stringify({ topic, user })
+  }),
+  deleteTopic: (topic, user) => request('/topics', {
+    method: "DELETE",
+    body: JSON.stringify({ topic, user })
   }),
 
-  getComent: (nameTopic) => request(`/topics/coments?topic=${nameTopic}`),
+  getComent: (topic) => request(`/topics/coments?topic=${topic}`),
   addComent: (topic, coment, user) => request('/topics/coment', {
     method: "POST",
+    body: JSON.stringify({ topic, coment, user })
+  }),
+  deleteComent: (topic, coment, user) => request('/topics/coment', {
+    method: "DELETE",
     body: JSON.stringify({ topic, coment, user })
   }),
 

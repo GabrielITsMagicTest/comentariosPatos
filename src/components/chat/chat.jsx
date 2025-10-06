@@ -20,8 +20,10 @@ const Chat = () => {
   const [topicID, setTopicID] = useState()
   const [statusApi, setStatusApi] = useState("loading")
   const [loadingComents, setLoadingComents] = useState("none")
-
+  const [findTopic, setFindTopic] = useState("")
+  // quando inciar o site
   useEffect(() => {
+    // ver se esta diponivel o site
     api.checkAvaliable()
       .then(() => {
         setStatusApi("loading_topics")
@@ -35,6 +37,39 @@ const Chat = () => {
       })
   }, [])
 
+  // atualizar site automaticamente
+  useEffect(() => {
+    // sempre sera chamada pra atualizar a pagina
+    const updateData = () => {
+      // atualizar topicos
+      api.getTopics()
+        .then((data) => {
+          if (data.topics.length != Object.keys(topics)) {
+            if (!findTopic) {
+              setTopics(data.topics)
+            }
+            else
+              findTopic(false, data.topics)
+          }
+        })
+
+      if (loadingComents == "ok") {
+        api.getComent(topicID)
+          .then((data) => {
+            if (data.coments.length != Object.keys(coments)) {
+              let result = {};
+              result = data.coments;
+              setComents(result)
+            }
+          })
+      }
+    }
+    const idInterval = setInterval(updateData, 3000); // atualizar a cada 3 segundos
+    return () => { clearInterval(idInterval) };
+
+  }, [loadingComents, topics, coments, findTopic])
+
+  // definir se ta disponivel site
   switch (statusApi) {
     case "loading":
       return <h1>Carregando...</h1>;
@@ -50,28 +85,31 @@ const Chat = () => {
       return <h1>Status desconhecido</h1>;
   }
 
+  const handleKey = (e, f) => {
+    if (e.key == "Enter") f()
+  }
+
   const handleChange = (event) => {
     const { name, value } = event.target
     setInputs(prev => ({ ...prev, [name]: value }))
   };
 
   const addTopic = () => {
-    const list_topics = Object.entries(topics[0]).map(([index, topic]) => {
-      return topic
-    })
-    if (list_topics.includes(inputs.topic)) {
-      alert("ja existe esse topic patorrice")
-      return
+    if (Object.keys(topics).length > 0) {
+      const list_topics = Object.entries(topics[0]).map(([index, topic]) => {
+        return topic
+      })
+      if (list_topics.includes(inputs.topic)) {
+        alert("ja existe esse topic patorrice")
+        return
+      }
     }
+    api.addTopic(inputs.topic, username)
 
-    api.addTopic({
-      name: inputs.topic,
-      user: username
-    })
     setTopics((prev) => {
       const result = [...prev]
       result.push({
-        name: inputs.topic,
+        topic: inputs.topic,
         user: username
       })
       return result
@@ -80,17 +118,30 @@ const Chat = () => {
     setInputs(prev => ({ ...prev, topic: "" }))
   }
 
+  const deleteTopic = (topic) => {
+    api.deleteTopic(topic, username)
+  }
+
   // faltando fazer
-  const findTopics = () => {
-    if (!topics[inputs.topic]) {
-      alert("nao existe esse topico")
-    }
+  const findTopics = (zero, topics) => {
+    // setFindTopic(prev => inputs.topics)
+    // console.log(inputs.topic, inputs.topic == "")
+    // if (inputs.topic == "") {
+
+    // } else {
+
+    //   console.log(33)
+    //   if (zero) setTopics({})
+    //   Object.entries(topics).map(([index, topic]) => {
+    //     if (topic.topic.includes(inputs.topic))
+    //       setTopics(prev => ({ ...prev, topic: topic.topic, user: topic }))
+    //   })
+    // }
   }
 
   const addComent = () => {
     api.addComent(topicID, inputs.coment, username)
 
-    console.log(coments)
     setComents(prev => {
       const result = [...prev]
       result.push({
@@ -103,7 +154,7 @@ const Chat = () => {
   }
 
   const getComent = (id) => {
-    id = id.name
+    id = id.topic
     if (topicID == id) return // nao executar se ja tiver selecionado
 
     setTopicID(id)
@@ -111,7 +162,6 @@ const Chat = () => {
     setComents({})
 
     // adicionar na api
-    console.log(id)
     api.getComent(id)
       .then((data) => {
         setLoadingComents("ok")
@@ -121,8 +171,8 @@ const Chat = () => {
       })
   }
 
-  const handleKeyComents = (e) => {
-    if (e.key == "Enter") addComent(topicID)
+  const deleteComent = (coment) => {
+    api.deleteComent(topicID, coment, username)
   }
 
   return (
@@ -141,6 +191,8 @@ const Chat = () => {
           topicsInput={inputs.topic}
           getComent={getComent}
           topicID={topicID}
+          handleKey={handleKey}
+          deleteTopic={deleteTopic}
           username={username}
         />
         <Coments
@@ -148,8 +200,10 @@ const Chat = () => {
           addComent={addComent}
           comentInput={inputs.coment}
           coments={coments}
-          handleKeyComents={handleKeyComents}
+          handleKey={handleKey}
           loadingComents={loadingComents}
+          username={username}
+          deleteComent={deleteComent}
         />
       </main>
     </div>

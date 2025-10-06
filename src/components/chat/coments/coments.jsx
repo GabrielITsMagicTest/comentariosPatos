@@ -1,12 +1,15 @@
 import './coments.css'
+import icon_delet from '../../../assets/icon-delet.png'
 
 const Coments = ({
-  handleKeyComents,
+  handleKey,
   handleChangeComents,
   addComent,
   comentInput,
   coments,
-  loadingComents
+  loadingComents,
+  username,
+  deleteComent
 }) => {
   return (
     <div className='coments'>
@@ -16,6 +19,11 @@ const Coments = ({
             <div className='content-coment'>
               <p>{coment.coment}</p>
               <div>
+                <button disabled={!(coment.user == username)} onClick={() => {
+                  deleteComent(coment.coment)
+                }}>
+                  <img className="coment-delet" src={icon_delet} />
+                </button>
                 <span>:{coment.user}</span>
               </div>
             </div>
@@ -35,8 +43,12 @@ const Coments = ({
       </ul>
 
       <nav>
-        <input onKeyDown={handleKeyComents} onChange={handleChangeComents} value={comentInput} placeholder='digite seu comentario'></input>
-        <button disabled={!comentInput} onClick={addComent}>enviar</button>
+        {loadingComents === "ok" &&
+          <div>
+            <input onKeyDown={(e) => handleKey(e, addComent)} onChange={handleChangeComents} value={comentInput} placeholder='digite seu comentario'></input>
+            <button disabled={!comentInput} onClick={addComent}>enviar</button>
+          </div>
+        }
       </nav>
     </div>
 
