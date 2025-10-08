@@ -105,6 +105,10 @@ const Chat = () => {
   const handleDeleteComent = (coment) => {
     console.log(coment)
     deleteComent(topicID, coment, username)
+    setComents((prev) => {
+      const result = [...prev].filter((ComentId) => ComentId.coment !== coment)
+      return result
+    })
   }
 
   // Renderização de status
