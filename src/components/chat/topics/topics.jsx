@@ -4,6 +4,7 @@ import React from 'react'
 // asssets
 import icon_delet from '../../../assets/icon-delet.png'
 import icon_lupa from '../../../assets/icon-lupa.png'
+import { useTopicsScrollToLI } from '../../../hooks/chat/useTopicsScrollToLI'
 
 const Topics = ({
   findTopics,
@@ -11,12 +12,15 @@ const Topics = ({
   topics,
   topicsInput,
   handleChangeTopics,
-  getComent,
+  fetchComents,
   topicID,
   deleteTopic,
   handleKey,
-  username
+  username,
+  refTopic
 }) => {
+
+  useTopicsScrollToLI(refTopic, topics)
   return (
     <div className='topics'>
       <nav>
@@ -27,7 +31,7 @@ const Topics = ({
         <button disabled={!topicsInput} onClick={addTopic}>+</button>
       </nav>
 
-      <ul className='topics-list'>
+      <ul ref={refTopic} className='topics-list'>
         {Object.entries(topics).map(([index, topic]) =>
           <li key={index}>
             <div className={topicID === topic.topic ? "select-topic" : ""}>
@@ -36,7 +40,7 @@ const Topics = ({
               }}>
                 <img src={icon_delet} />
               </button>
-              <button className='topic-name' onClick={() => getComent(topic)}>
+              <button className='topic-name' onClick={() => fetchComents(topic)}>
                 {topic.topic}
               </button>
             </div>

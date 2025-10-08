@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './chat.css'
 
 // components
@@ -6,84 +6,30 @@ import Topics from './topics/topics'
 import Coments from './coments/coments'
 
 // services
-import api from '../../services/api'
 import { useSearchParams } from 'react-router-dom'
+import { getComents, deleteTopic, addTopic, addComent, deleteComent } from '../../services/api/chatApi'
+
+// hooks
+import { useInitialData } from '../../hooks/chat/useInitialData'
+import { usePolling } from '../../hooks/chat/usePolling'
+import { UseComents } from '../../hooks/chat/useComents'
 
 const Chat = () => {
 
   const [searchParams] = useSearchParams()
 
   let username = searchParams.get("user")
-  const [coments, setComents] = useState({})
   const [inputs, setInputs] = useState({ topic: "", coment: "" })
-  const [topics, setTopics] = useState({})
-  const [topicID, setTopicID] = useState()
-  const [statusApi, setStatusApi] = useState("loading")
-  const [loadingComents, setLoadingComents] = useState("none")
   const [findTopic, setFindTopic] = useState("")
-  // quando inciar o site
-  useEffect(() => {
-    // ver se esta diponivel o site
-    api.checkAvaliable()
-      .then(() => {
-        setStatusApi("loading_topics")
-        return api.getTopics()
-      }).then((data) => {
-        setTopics(data.topics)
-        setStatusApi("ok")
 
-      }).catch((error) => {
-        setStatusApi(prev => "loading_topics" ? "error_db_topics" : "error")
-      })
-  }, [])
+  // useState
+  const { statusApi, setTopics, topics } = useInitialData()
+  const { coments, topicID, loadingComents, fetchComents, setComents, refComents } = UseComents()
+  // ref
+  const refTopic = useRef(null)
 
   // atualizar site automaticamente
-  useEffect(() => {
-    // sempre sera chamada pra atualizar a pagina
-    const updateData = () => {
-      // atualizar topicos
-      api.getTopics()
-        .then((data) => {
-          if (data.topics.length != Object.keys(topics)) {
-            if (!findTopic) {
-              setTopics(data.topics)
-            }
-            else
-              findTopic(false, data.topics)
-          }
-        })
-
-      if (loadingComents == "ok") {
-        api.getComent(topicID)
-          .then((data) => {
-            if (data.coments.length != Object.keys(coments)) {
-              let result = {};
-              result = data.coments;
-              setComents(result)
-            }
-          })
-      }
-    }
-    const idInterval = setInterval(updateData, 3000); // atualizar a cada 3 segundos
-    return () => { clearInterval(idInterval) };
-
-  }, [loadingComents, topics, coments, findTopic])
-
-  // definir se ta disponivel site
-  switch (statusApi) {
-    case "loading":
-      return <h1>Carregando...</h1>;
-    case "loading_topics":
-      return <h1>Carregando os tópicos...</h1>;
-    case "error":
-      return <h1>Banco de dados indisponível</h1>;
-    case "error_db_topics":
-      return <h1>Banco de dados não tem tópicos no momento :(</h1>;
-    case "ok":
-      break;
-    default:
-      return <h1>Status desconhecido</h1>;
-  }
+  usePolling({ topics, setTopics, topicID, coments, setComents, loadingComents, findTopic })
 
   const handleKey = (e, f) => {
     if (e.key == "Enter") f()
@@ -94,7 +40,7 @@ const Chat = () => {
     setInputs(prev => ({ ...prev, [name]: value }))
   };
 
-  const addTopic = () => {
+  const handleAddTopic = () => {
     if (Object.keys(topics).length > 0) {
       const list_topics = Object.entries(topics[0]).map(([index, topic]) => {
         return topic
@@ -104,7 +50,7 @@ const Chat = () => {
         return
       }
     }
-    api.addTopic(inputs.topic, username)
+    addTopic(inputs.topic, username)
 
     setTopics((prev) => {
       const result = [...prev]
@@ -118,10 +64,13 @@ const Chat = () => {
     setInputs(prev => ({ ...prev, topic: "" }))
   }
 
-  const deleteTopic = (topic) => {
-    api.deleteTopic(topic, username)
+  const handleDeleteTopic = (topic) => {
+    deleteTopic(topic, username)
+    setTopics((prev) => {
+      const result = [...prev].filter((topicId) => topicId.topic !== topic)
+      return result
+    })
   }
-
   // faltando fazer
   const findTopics = (zero, topics) => {
     // setFindTopic(prev => inputs.topics)
@@ -139,8 +88,8 @@ const Chat = () => {
     // }
   }
 
-  const addComent = () => {
-    api.addComent(topicID, inputs.coment, username)
+  const handleAddComent = () => {
+    addComent(topicID, inputs.coment, username)
 
     setComents(prev => {
       const result = [...prev]
@@ -153,27 +102,16 @@ const Chat = () => {
     setInputs(prev => ({ ...inputs, coment: "" }))
   }
 
-  const getComent = (id) => {
-    id = id.topic
-    if (topicID == id) return // nao executar se ja tiver selecionado
-
-    setTopicID(id)
-    setLoadingComents("loading")
-    setComents({})
-
-    // adicionar na api
-    api.getComent(id)
-      .then((data) => {
-        setLoadingComents("ok")
-        let result = {};
-        result = data.coments;
-        setComents(result)
-      })
+  const handleDeleteComent = (coment) => {
+    console.log(coment)
+    deleteComent(topicID, coment, username)
   }
 
-  const deleteComent = (coment) => {
-    api.deleteComent(topicID, coment, username)
-  }
+  // Renderização de status
+  if (statusApi === "loading") return <h1>Carregando...</h1>;
+  if (statusApi === "loading_topics") return <h1>Carregando os tópicos...</h1>;
+  if (statusApi === "error") return <h1>Banco de dados indisponível</h1>;
+  if (statusApi === "error_db_topics") return <h1>Banco de dados não tem tópicos no momento :(</h1>;
 
   return (
     <div className='body'>
@@ -186,24 +124,26 @@ const Chat = () => {
         <Topics
           handleChangeTopics={(event) => handleChange({ ...event, target: { name: "topic", value: event.target.value } })}
           findTopics={findTopics}
-          addTopic={addTopic}
+          addTopic={handleAddTopic}
           topics={topics}
           topicsInput={inputs.topic}
-          getComent={getComent}
+          fetchComents={fetchComents}
           topicID={topicID}
           handleKey={handleKey}
-          deleteTopic={deleteTopic}
+          deleteTopic={handleDeleteTopic}
           username={username}
+          refTopic={refTopic}
         />
         <Coments
           handleChangeComents={(event) => handleChange({ ...event, target: { name: "coment", value: event.target.value } })}
-          addComent={addComent}
+          addComent={handleAddComent}
           comentInput={inputs.coment}
           coments={coments}
           handleKey={handleKey}
           loadingComents={loadingComents}
           username={username}
-          deleteComent={deleteComent}
+          deleteComent={handleDeleteComent}
+          refComents={refComents}
         />
       </main>
     </div>

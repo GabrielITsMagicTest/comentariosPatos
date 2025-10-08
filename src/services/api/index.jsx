@@ -1,5 +1,5 @@
-const url = "https://comentariospatoapi.onrender.com"
-// const url = "http://localhost:6060"
+// const url = "https://comentariospatoapi.onrender.com"
+const url = "http://localhost:6060"
 
 async function request(endpoint, options = {}) {
   const res = await fetch(`${url}${endpoint}`, {

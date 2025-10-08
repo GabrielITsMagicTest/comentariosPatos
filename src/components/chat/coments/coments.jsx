@@ -1,5 +1,7 @@
 import './coments.css'
 import icon_delet from '../../../assets/icon-delet.png'
+import { useEffect } from 'react';
+import { useComentsScrollToLI } from '../../../hooks/chat/useComentsScrollToLI';
 
 const Coments = ({
   handleKey,
@@ -9,11 +11,15 @@ const Coments = ({
   coments,
   loadingComents,
   username,
-  deleteComent
+  deleteComent,
+  refComents,
 }) => {
+
+  useComentsScrollToLI(refComents, loadingComents, comentInput)
+
   return (
     <div className='coments'>
-      <ul className='coments-list'>
+      <ul ref={refComents} className='coments-list'>
         {Object.entries(coments).map(([index, coment]) =>
           <li key={index}>
             <div className='content-coment'>
